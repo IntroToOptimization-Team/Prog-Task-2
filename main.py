@@ -3,6 +3,7 @@ from numpy.linalg import norm
 
 
 def Inter_Point(C, A, x, alpha, eps):
+    # i is to stop if we have not enough python accuracy to calculate the answer
     i = 1
     if min(x) < 0 or not (0 < alpha < 1) or eps <= 0:
         print("The method is not applicable!")
@@ -33,6 +34,7 @@ def Inter_Point(C, A, x, alpha, eps):
 
         i += 1
 
+        # check that x has changed during the step significantly
         if norm(np.subtract(yy, v), ord = 2) < eps:
             return np.dot(C, x), x
 
@@ -133,6 +135,7 @@ tests = ["test1", "test2", "test3", "test4"]
 
 for test in tests:
     with open(f"tests/{test}.txt") as file:
+        # data input
         c = [float(el) for el in file.readline().strip().split(" ")]
         empty_line = file.readline()
         A = []
@@ -147,7 +150,9 @@ for test in tests:
         empty_line = file.readline()
         eps = float(file.readline().strip())
 
+        # start test
         print(test)
+        # simplex method
         res = simplex(c, A, b, eps)
         print("SIMPLEX METHOD:")
         if res["solver_state"] == "unbounded":
@@ -156,13 +161,16 @@ for test in tests:
             print("The solution:")
             print(" ".join(map(lambda x: str(round(x, 6)), res["x*"])))
             print(round(res["z"], 6))
+
         print("INTERIOR POINT ALGORITHM:")
+        # make input data be in convenient format
         for i in range(len(b)):
             c.append(0)
-
         identity_matrix = np.eye(len(b))
         A = np.hstack((A, identity_matrix))
+        # applying algorithm for different alphas
         for alpha in alphas:
+            # interior point algorithm
             result = Inter_Point(c, A, x, alpha, eps)
             if result is not None:
                 z, x = result
